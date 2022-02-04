@@ -26,8 +26,7 @@ pio.templates.default = "plotly_dark"
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets, meta_tags=[{"name": "viewport", "content": "width=device-width"}])
 server = app.server
 
 
@@ -229,4 +228,4 @@ def update_stocks_live(n_clicks, value, n):
 
 if __name__ == '__main__':
 
-    app.run_server(debug=False,host='192.168.8.151', port=80)
+    app.run_server()
