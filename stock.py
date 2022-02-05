@@ -20,17 +20,10 @@ import plotly.io as pio
 
 pio.templates.default = "plotly_dark" 
 
-
-# Override Yahoo Finance 
-# yf.pdr_override()
-
-
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
-
-global stock
 stock ="BABA"
 
 app.layout = html.Div(
@@ -54,8 +47,7 @@ app.layout = html.Div(
     [Input(component_id ='interval-component', component_property= 'n_intervals')]
     )
 def display_time(n):
-    print ('n_intervals:' + str(n) + ' at ' + str(datetime.datetime.now()))
-    # further_function_which_should_be_controlled_by_dcc.Interval()
+    #print ('n_intervals:' + str(n) + ' at ' + str(datetime.datetime.now()))
     style = {'padding': '5px', 'fontSize': '20px', 'color':'white', 'font-weight': 'bold'}
     return html.Span("Call No.: {}; Call at: {}".format(n, str(datetime.datetime.now()), style=style))
 
@@ -77,11 +69,7 @@ def update_output_div(n_clicks, value, n):
     else:
         next_value = my_list[my_list.index(value)+1]
 
-    #price = df['Adj Close'].iloc[-1]
     style = {'padding': '5px', 'fontSize': '20px', 'color':'white', 'font-weight': 'bold'}
-    # # return [
-    # #     html.Span(value + ' Latest Price: {0:.2f}'.format(price), style=style), next_value
-    # # ]
     print("Next Ticker: " + next_value)
     return [
          html.Span('Calling Ticker: {}'.format(value), style=style), next_value
@@ -98,12 +86,11 @@ def update_output_div(n_clicks, value, n):
 def update_stocks_live(n_clicks, value, n):
 
     print("Trying Ticker: " + value)
-    try: # st art watching for errors
+    try: 
         #df = yf.download(tickers=value,period='1d',interval='1m', threads = True, prepost= True)
         
         data = yf.Ticker(value)
         df = data.history(period='1d',interval='1m')
-        
         
     except KeyError:  # catch unspecific or specific errors/exceptions
         # handling this error type begins here: print and return
@@ -221,8 +208,6 @@ def update_stocks_live(n_clicks, value, n):
     )
     return fig
     
-    
 
 if __name__ == '__main__':
-
     app.run_server()
