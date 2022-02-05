@@ -26,7 +26,7 @@ pio.templates.default = "plotly_dark"
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets, meta_tags=[{"name": "viewport", "content": "width=device-width"}])
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
 
@@ -100,13 +100,10 @@ def update_stocks_live(n_clicks, value, n):
     print("Trying Ticker: " + value)
     try: # st art watching for errors
         #df = yf.download(tickers=value,period='1d',interval='1m', threads = True, prepost= True)
-        #name = "NAME"
-        #price = 100
+        
         data = yf.Ticker(value)
         df = data.history(period='1d',interval='1m')
-        #price = round(df['Close'].iloc[-1], 2)
-        #print("Price detected is: " + str(price))
-        name = data.info['longName']
+        
         
     except KeyError:  # catch unspecific or specific errors/exceptions
         # handling this error type begins here: print and return
