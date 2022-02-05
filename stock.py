@@ -22,6 +22,7 @@ pio.templates.default = "plotly_dark"
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app.title = "Stock Tracker"
 server = app.server
 
 stock ="BABA"

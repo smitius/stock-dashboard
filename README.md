@@ -1,5 +1,4 @@
-stock-dashboard
-dash app to visualize daily stock values
+stock-dashboard: dash app to visualize daily stock values
 
 How to run locally on server:
 
@@ -23,6 +22,6 @@ start_cmd="${name}_start" stop_cmd=":"
 
 load_rc_config $name
 
-stock_start() { cd $ROOT exec $GUNICORN index:application --bind=0.0.0.0:80 & }
+stock_start() { cd $ROOT exec $GUNICORN index:application --bind=0.0.0.0:80 --daemon & }
 
 run_rc_command "$1"
