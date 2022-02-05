@@ -1,4 +1,5 @@
 import datetime
+import json
 from re import template
 from turtle import color
 import dash
@@ -20,6 +21,15 @@ import plotly.io as pio
 
 pio.templates.default = "plotly_dark" 
 
+
+# Reading json config file once
+json_file_path = "assets/config.json"
+with open(json_file_path) as f:
+    data = json.load(f)
+
+refresh_rate = data['refresh_rate']
+print(refresh_rate)
+
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.title = "Stock Tracker"
@@ -34,7 +44,7 @@ app.layout = html.Div(
         html.Div(["Next in List: ",
               dcc.Input(id='my-input', value=stock, type='text'), html.Button("Go", id="submit-button", style={'color':'white'}, n_clicks=0)], style={'color':'white'}),
         html.Br(),
-        dcc.Graph(id='live-update-stocks', style={'width': '90vh', 'height': '40vh'}),
+        dcc.Graph(id='live-update-stocks', style={'width': '1vh', 'height': '1vh'}),
         dcc.Interval(
             id='interval-component',
             interval=1*60000, # in milliseconds
@@ -48,9 +58,8 @@ app.layout = html.Div(
     [Input(component_id ='interval-component', component_property= 'n_intervals')]
     )
 def display_time(n):
-    #print ('n_intervals:' + str(n) + ' at ' + str(datetime.datetime.now()))
     style = {'padding': '5px', 'fontSize': '20px', 'color':'white', 'font-weight': 'bold'}
-    return html.Span("Call No.: {}; Call at: {}".format(n, str(datetime.datetime.now()), style=style))
+    return html.Span("Call No.: {}; Call at: {}; Refresh Rate: {:.0f} sec".format(n, str(datetime.datetime.now()), refresh_rate/1000, style=style))
 
 
 @app.callback(
@@ -62,7 +71,7 @@ def display_time(n):
 )
 def update_output_div(n_clicks, value, n):
     
-    my_list = ['BABA', 'NIO', 'AMZN','BIDU','JMIA','T','EDIT','JD','LCID','FB','MSFT','NRZ','PLTR','PYPL','PFE','RKLB','WMT','NFLX','GGPI']
+    my_list = data['stocks']
 
     if((my_list.index(value) + 1) == (len(my_list))):
         #if last in the list

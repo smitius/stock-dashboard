@@ -1,0 +1,4 @@
+{
+    "stocks": ["BABA", "NIO", "AMZN","BIDU","JMIA","T","EDIT","JD","LCID","FB","MSFT","NRZ","PLTR","PYPL","PFE","RKLB","WMT","NFLX","GGPI"],
+    "refresh_rate": 60000
+}
