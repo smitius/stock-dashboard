@@ -176,7 +176,7 @@ def update_stocks_live(n_clicks, value, n):
                             ), row=4, col=1)
 
     # update layout by changing the plot size, hiding legends & rangeslider, and removing gaps between dates
-    fig.update_layout(height=800, width=1890, 
+    fig.update_layout(height=850, width=1890, 
                     showlegend=False, 
                     xaxis_rangeslider_visible=False)
                     
