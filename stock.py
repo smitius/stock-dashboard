@@ -34,7 +34,7 @@ app.layout = html.Div(
         html.Div(["Next in List: ",
               dcc.Input(id='my-input', value=stock, type='text'), html.Button("Go", id="submit-button", style={'color':'white'}, n_clicks=0)], style={'color':'white'}),
         html.Br(),
-        dcc.Graph(id='live-update-stocks', style={'width': '90vh', 'height': '90vh'}),
+        dcc.Graph(id='live-update-stocks', style={'width': '90vh', 'height': '40vh'}),
         dcc.Interval(
             id='interval-component',
             interval=1*60000, # in milliseconds
@@ -176,7 +176,7 @@ def update_stocks_live(n_clicks, value, n):
                             ), row=4, col=1)
 
     # update layout by changing the plot size, hiding legends & rangeslider, and removing gaps between dates
-    fig.update_layout(height=790, width=1200, 
+    fig.update_layout(height=800, width=1890, 
                     showlegend=False, 
                     xaxis_rangeslider_visible=False)
                     
