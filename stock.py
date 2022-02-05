@@ -84,7 +84,7 @@ def update_output_div(n_clicks, value, n):
     # # ]
     print("Next Ticker: " + next_value)
     return [
-         html.Span('Current Ticker: {}'.format(value), style=style), next_value
+         html.Span('Calling Ticker: {}'.format(value), style=style), next_value
     ]
    
 
