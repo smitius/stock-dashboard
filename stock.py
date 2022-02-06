@@ -1,6 +1,7 @@
 import datetime
 import json
 from re import template
+from tkinter.tix import Tree
 from turtle import color
 import dash
 from dash import html
@@ -39,7 +40,7 @@ stock ="BABA"
 
 app.layout = html.Div(
     html.Div([
-        html.H5('Stocks Live Feed', style={'color':'white', 'text-align': 'center'}),
+        #html.H5('Stocks Live Feed', style={'color':'white', 'text-align': 'center'}),
         html.Div([html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white'})]),
         html.Div(["Next in List: ",
               dcc.Input(id='my-input', value=stock, type='text'), html.Button("Go", id="submit-button", style={'color':'white'}, n_clicks=0)], style={'color':'white'}),
@@ -133,7 +134,7 @@ def update_stocks_live(n_clicks, value, n):
     # add subplot properties when initializing fig variable
     fig = plotly.subplots.make_subplots(rows=5, cols=1, shared_xaxes=True,
                         vertical_spacing=0.01, 
-                        row_heights=[0.5,0.1,0.2,0.2,0.3])
+                        row_heights=[0.4,0.1,0.2,0.2,0.3])
 
     fig.add_trace(go.Candlestick(x=df.index,
                     open=df['Open'],
@@ -210,7 +211,8 @@ def update_stocks_live(n_clicks, value, n):
     fig.update_yaxes(title_text="Price", row=1, col=1)
     fig.update_yaxes(title_text="Volume", row=2, col=1)
     fig.update_yaxes(title_text="MACD", showgrid=False, row=3, col=1)
-    fig.update_yaxes(title_text="Stoch", row=4, col=1)           
+    fig.update_yaxes(title_text="Stoch", row=4, col=1)
+    fig.update_yaxes(title_text="60 Days", row=5, col=1)           
 
     fig.update_xaxes(
         rangeslider_visible=False,
