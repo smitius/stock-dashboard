@@ -1,7 +1,6 @@
 import datetime
 import json
 from re import template
-from tkinter.tix import Tree
 from turtle import color
 import dash
 from dash import html
@@ -36,7 +35,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.title = "Stock Tracker"
 server = app.server
 
-stock ="BABA"
+stock ="COIN"
 
 app.layout = html.Div(
     html.Div([
@@ -188,14 +187,14 @@ def update_stocks_live(n_clicks, value, n):
                             line=dict(color='blue', width=1)
                             ), row=4, col=1)
 
-    # Plot 5 day stock price trace on 5th row
+    # Plot 60 day stock price trace on 5th row
     fig.add_trace(go.Scatter(x=df_long.index,
                             y=df_long['Close'],
                             fill='tozeroy'
                             ), row=5, col=1)
 
     # update layout by changing the plot size, hiding legends & rangeslider, and removing gaps between dates
-    fig.update_layout(height=900, width=1890, 
+    fig.update_layout(height=910, width=1890, 
                     showlegend=False, 
                     xaxis_rangeslider_visible=False)
                     
