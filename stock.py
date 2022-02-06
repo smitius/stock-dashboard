@@ -101,6 +101,9 @@ def update_stocks_live(n_clicks, value, n):
         
         data = yf.Ticker(value)
         df = data.history(period='1d',interval='1m')
+
+        df_long = data.history('3mo')
+        df_long = df_long.reset_index()
         
     except KeyError:  # catch unspecific or specific errors/exceptions
         # handling this error type begins here: print and return
@@ -128,9 +131,9 @@ def update_stocks_live(n_clicks, value, n):
     fig=go.Figure()
 
     # add subplot properties when initializing fig variable
-    fig = plotly.subplots.make_subplots(rows=4, cols=1, shared_xaxes=True,
+    fig = plotly.subplots.make_subplots(rows=5, cols=1, shared_xaxes=True,
                         vertical_spacing=0.01, 
-                        row_heights=[0.5,0.1,0.2,0.2])
+                        row_heights=[0.5,0.1,0.2,0.2,0.3])
 
     fig.add_trace(go.Candlestick(x=df.index,
                     open=df['Open'],
@@ -184,13 +187,19 @@ def update_stocks_live(n_clicks, value, n):
                             line=dict(color='blue', width=1)
                             ), row=4, col=1)
 
+    # Plot 5 day stock price trace on 5th row
+    fig.add_trace(go.Scatter(x=df_long.index,
+                            y=df_long['Close'],
+                            fill='tozeroy'
+                            ), row=5, col=1)
+
     # update layout by changing the plot size, hiding legends & rangeslider, and removing gaps between dates
-    fig.update_layout(height=850, width=1890, 
+    fig.update_layout(height=900, width=1890, 
                     showlegend=False, 
                     xaxis_rangeslider_visible=False)
                     
 
-    # Make the title dynamic to reflect whichever stock we are analyzing
+    # Make the title dynamic to reflect which stock we are analyzing
     fig.update_layout(
         title= str(name)+' : ' + str(price) + ' USD',
         yaxis_title='Stock Price (USD per Shares)',
