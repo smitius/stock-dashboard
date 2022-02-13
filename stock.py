@@ -40,10 +40,20 @@ stock ="COIN"
 app.layout = html.Div(
     html.Div([
         #html.H5('Stocks Live Feed', style={'color':'white', 'text-align': 'center'}),
-        html.Div([html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white'})]),
-        html.Div(["Next in List: ",
-              dcc.Input(id='my-input', value=stock, type='text'), html.Button("Go", id="submit-button", style={'color':'white'}, n_clicks=0)], style={'color':'white'}),
-        html.Br(),
+        html.Div([html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}),dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '50px', 'margin-right': '5px'}), html.Button("Go", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0) ], style={'textAlign': 'left'}),
+        html.Div([
+        html.Img(
+            src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=1&scale=20&maxfps=1&buffer=1000',
+            ),
+        html.Img(
+            src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=2&scale=20&maxfps=1&buffer=1000', style={'margin-left': '5px'}
+            ),
+        
+            ], style={'textAlign': 'right', 'color':'white', 'margin-left': '5px'},
+        ),
+        #html.Div(["Next in List: ",
+        #      dcc.Input(id='my-input', value=stock, type='text'), html.Button("Go", id="submit-button", style={'color':'white'}, n_clicks=0)], style={'color':'white'}),
+        #html.Br(),
         dcc.Graph(id='live-update-stocks', style={'width': '1vh', 'height': '1vh'}),
         dcc.Interval(
             id='interval-component',
@@ -110,8 +120,10 @@ def update_stocks_live(n_clicks, value, n):
         print("Error: Bad response from YFinance! Ticker:" + value)
         return
 
+    #get values 
     price = round(df['Close'].iloc[-1], 2)
     name = data.info['longName']
+    current_time = df.index[-1]
     df['MA5'] = df['Close'].rolling(window=5).mean()
     df['MA20'] = df['Close'].rolling(window=20).mean()
 
@@ -194,14 +206,14 @@ def update_stocks_live(n_clicks, value, n):
                             ), row=5, col=1)
 
     # update layout by changing the plot size, hiding legends & rangeslider, and removing gaps between dates
-    fig.update_layout(height=910, width=1890, 
+    fig.update_layout(height=890, width=1890, 
                     showlegend=False, 
                     xaxis_rangeslider_visible=False)
                     
 
     # Make the title dynamic to reflect which stock we are analyzing
     fig.update_layout(
-        title= str(name)+' : ' + str(price) + ' USD',
+        title= str(name)+' : ' + '<b>' + str(price) + '</b>' + ' USD   Last Time: ' + str(current_time),
         yaxis_title='Stock Price (USD per Shares)',
         title_font_size=30
         ) 
