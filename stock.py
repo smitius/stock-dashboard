@@ -43,10 +43,10 @@ app.layout = html.Div(
         html.Div([html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}),dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '50px', 'margin-right': '5px'}), html.Button("Go", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0) ], style={'textAlign': 'left'}),
         html.Div([
         html.Img(
-            src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=1&scale=20&maxfps=1&buffer=1000',
+            src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=1&scale=20&maxfps=0.1&buffer=1000',
             ),
         html.Img(
-            src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=2&scale=20&maxfps=1&buffer=1000', style={'margin-left': '5px'}
+            src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=2&scale=20&maxfps=0.1&buffer=1000', style={'margin-left': '5px'}
             ),
         
             ], style={'textAlign': 'right', 'color':'white', 'margin-left': '5px'},
