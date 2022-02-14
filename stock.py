@@ -2,6 +2,7 @@ import datetime
 import json
 from re import template
 from turtle import color
+from unicodedata import mirrored
 import dash
 from dash import html
 from dash import dcc
@@ -40,7 +41,7 @@ stock ="COIN"
 app.layout = html.Div(
     html.Div([
         #html.H5('Stocks Live Feed', style={'color':'white', 'text-align': 'center'}),
-        html.Div([html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}),dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '50px', 'margin-right': '5px'}), html.Button("Go", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0) ], style={'textAlign': 'left'}),
+        html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Go", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}) ], style={'textAlign': 'left'}),
         html.Div([
         html.Img(
             src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=1&scale=20&maxfps=0.1&buffer=1000',
@@ -48,12 +49,13 @@ app.layout = html.Div(
         html.Img(
             src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=2&scale=20&maxfps=0.1&buffer=1000', style={'margin-left': '5px'}
             ),
+        html.Img(
+            src='http://185.102.215.186/current/129copyright!/sergelstorg_live.jpg', style={'margin-left': '5px', 'height':'10.57%', 'width':'10.7%'}
+            ),
         
             ], style={'textAlign': 'right', 'color':'white', 'margin-left': '5px'},
         ),
-        #html.Div(["Next in List: ",
-        #      dcc.Input(id='my-input', value=stock, type='text'), html.Button("Go", id="submit-button", style={'color':'white'}, n_clicks=0)], style={'color':'white'}),
-        #html.Br(),
+    
         dcc.Graph(id='live-update-stocks', style={'width': '1vh', 'height': '1vh'}),
         dcc.Interval(
             id='interval-component',
@@ -145,7 +147,8 @@ def update_stocks_live(n_clicks, value, n):
     # add subplot properties when initializing fig variable
     fig = plotly.subplots.make_subplots(rows=5, cols=1, shared_xaxes=True,
                         vertical_spacing=0.01, 
-                        row_heights=[0.4,0.1,0.2,0.2,0.3])
+                        row_heights=[0.4,0.1,0.2,0.2,0.3],
+                        )
 
     fig.add_trace(go.Candlestick(x=df.index,
                     open=df['Open'],
@@ -205,6 +208,29 @@ def update_stocks_live(n_clicks, value, n):
                             fill='tozeroy'
                             ), row=5, col=1)
 
+
+    #Calculate Min and Max on the long term chart and plot the points
+    #
+    maxindex = df_long['Close'].idxmax()
+    minindex = df_long['Close'].idxmin()
+
+    max1 = df_long.loc[[maxindex]]
+    min = df_long.loc[[minindex]]
+
+    max1 = max1.append(min, ignore_index = False)
+
+    text = ['Max', 'Min']
+    max1['Extreme'] = text
+
+    fig.add_trace(go.Scatter(x=max1.index,
+                            y=max1['High'],
+                            text=max1['High'],
+                            mode='lines+text',
+                            line=dict(color='white', width=3),
+                            textfont_size=14,
+                            textposition='bottom center',
+                            ), row=5, col=1)
+
     # update layout by changing the plot size, hiding legends & rangeslider, and removing gaps between dates
     fig.update_layout(height=880, width=1890, 
                     showlegend=False, 
@@ -223,7 +249,7 @@ def update_stocks_live(n_clicks, value, n):
     fig.update_yaxes(title_text="Volume", row=2, col=1)
     fig.update_yaxes(title_text="MACD", showgrid=False, row=3, col=1)
     fig.update_yaxes(title_text="Stoch", row=4, col=1)
-    fig.update_yaxes(title_text="60 Days", row=5, col=1)           
+    fig.update_yaxes(title_text="60 Days Ago", row=5, col=1, side="left")     
 
     fig.update_xaxes(
         rangeslider_visible=False,
