@@ -1,5 +1,6 @@
 import datetime
 import json
+import random
 from re import template
 from turtle import color
 from unicodedata import mirrored
@@ -41,21 +42,8 @@ stock ="COIN"
 app.layout = html.Div(
     html.Div([
         #html.H5('Stocks Live Feed', style={'color':'white', 'text-align': 'center'}),
-        html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Go", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}) ], style={'textAlign': 'left'}),
-        html.Div([
-        html.Img(
-            src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=1&scale=20&maxfps=0.1&buffer=1000',
-            ),
-        html.Img(
-            src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=2&scale=20&maxfps=0.1&buffer=1000', style={'margin-left': '5px'}
-            ),
-        html.Img(
-            src='http://185.102.215.186/current/129copyright!/sergelstorg_live.jpg', style={'margin-left': '5px', 'height':'10.57%', 'width':'10.7%'}
-            ),
-        
-            ], style={'textAlign': 'right', 'color':'white', 'margin-left': '5px'},
-        ),
-    
+        html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Go", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}), html.Span(id='display-cams', style={'verticalAlign': 'top'}) ], style={'textAlign': 'left'}),
+        #html.Div(id='display-cams'),
         dcc.Graph(id='live-update-stocks', style={'width': '1vh', 'height': '1vh'}),
         dcc.Interval(
             id='interval-component',
@@ -64,6 +52,30 @@ app.layout = html.Div(
         ),
     ])
 )
+
+#part where I update the cameras and weather sensor data
+@app.callback(
+    Output(component_id ='display-cams', component_property= 'children'),
+    [Input(component_id ='interval-component', component_property= 'n_intervals')]
+    )
+def display_cams(n):
+    style = {'padding': '5px', 'fontSize': '20px', 'color':'white', 'font-weight': 'bold'}
+    public_url = 'http://185.102.215.186/current/129copyright!/sergelstorg_live.jpg' + '?t=' + str(random.randint(1, 1000))
+    print('public url:' + public_url)
+    return html.Div([
+            html.Img(
+                src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=1&scale=20&maxfps=0.1&buffer=1000',
+            ),
+            html.Img(
+                src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=2&scale=20&maxfps=0.1&buffer=1000', style={'margin-left': '5px'}
+            ),
+            html.Img(
+                src=public_url, style={'margin-left': '5px', 'height':'10.57%', 'width':'10.7%'}
+            ),
+            ], style={'textAlign': 'right', 'color':'white', 'margin-left': '5px'},
+        )
+
+
 
 @app.callback(
     Output(component_id ='display-time', component_property= 'children'),
