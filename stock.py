@@ -12,6 +12,16 @@ from dash.dependencies import Input, Output
 from ta.trend import MACD
 from ta.momentum import StochasticOscillator
 
+#for Image Manipulation
+from PIL import Image
+import urllib.request
+import os
+import uuid
+from datetime import datetime
+
+#for reading json data
+from urllib.request import urlopen
+
 # Market Data 
 import yfinance as yf
 
@@ -34,16 +44,17 @@ print(refresh_rate)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-app.title = "Stock Tracker"
+app.title = "Dash.board"
 server = app.server
 
+#starting ticker
 stock ="COIN"
 
 app.layout = html.Div(
     html.Div([
-        #html.H5('Stocks Live Feed', style={'color':'white', 'text-align': 'center'}),
-        html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Go", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}), html.Span(id='display-cams', style={'verticalAlign': 'top'}) ], style={'textAlign': 'left'}),
-        #html.Div(id='display-cams'),
+        html.Div(id='display-cams', style={'display': 'inline-block'}),
+        html.Div(id='display-weather', style={'display': 'inline-block', 'margin-left': '10px'}),
+        html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Go Next", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}) ], style={'textAlign': 'left'}),
         dcc.Graph(id='live-update-stocks', style={'width': '1vh', 'height': '1vh'}),
         dcc.Interval(
             id='interval-component',
@@ -53,26 +64,109 @@ app.layout = html.Div(
     ])
 )
 
-#part where I update the cameras and weather sensor data
+@app.callback(
+    Output(component_id ='display-weather', component_property= 'children'),
+    [Input(component_id ='interval-component', component_property= 'n_intervals')]
+    )
+def display_weather(n):
+    #get weather data from Blynk
+    blynkUrl = 'http://blynk-cloud.com/Cr21xDVLueTUiz8MgFqCcayc2rDft_hD/project'
+
+    response = urlopen(blynkUrl)
+    data_json = json.loads(response.read())
+
+    temperature = data_json['widgets'][0]['value']
+    luxmeter = data_json['widgets'][2]['value']
+    pressure = data_json['widgets'][3]['value']
+    humidity = data_json['widgets'][4]['value']
+
+    #print(round(float(temperature),1),luxmeter,pressure,humidity)
+
+
+    return html.Div([
+            html.P(
+                'Temperature: ' + str(round(float(temperature),1)) + ' °C'
+            ),
+            html.P(
+                'Humidity: ' + str(round(float(humidity),1)) + ' %'
+            ),
+            html.P(
+                'Pressure: ' + str(round(float(pressure),1)) + ' hPa'
+            ),
+            html.P(
+                'Luminosity: ' + str(round(float(luxmeter),1)) + ' lux'
+            ),
+            ], style={'text-align':'right', 'color':'#33A5FF', 'font-weight': 'bold', 'fontSize': '15px', 'padding': '3px'},
+        )
+
+
+#part where I update the cameras
 @app.callback(
     Output(component_id ='display-cams', component_property= 'children'),
     [Input(component_id ='interval-component', component_property= 'n_intervals')]
     )
 def display_cams(n):
-    style = {'padding': '5px', 'fontSize': '20px', 'color':'white', 'font-weight': 'bold'}
-    public_url = 'http://185.102.215.186/current/129copyright!/sergelstorg_live.jpg' + '?t=' + str(random.randint(1, 1000))
-    print('public url:' + public_url)
+    #remove all previous images if present
+    files_in_directory = os.listdir('assets')
+    filtered_files = [file for file in files_in_directory if file.endswith(".jpg")]
+
+    for file in filtered_files:
+        path_to_file = os.path.join('assets', file)
+        os.remove(path_to_file)
+
+    #donwload, process the images and store it in assets 
+    size = (250, 125)
+
+    cam1tempfullfilename = os.path.join('assets', 'cam1_temp.jpg')
+    cam1file = str(uuid.uuid4()) + '.jpg'
+    cam1fullfilename = os.path.join(*["assets",cam1file])
+    cam1url = 'http://192.168.8.157/cgi-bin/nph-zms?mode=single&monitor=1'
+
+    cam2tempfullfilename = os.path.join('assets', 'cam2_temp.jpg')
+    cam2file = str(uuid.uuid4()) + '.jpg'
+    cam2fullfilename = os.path.join(*["assets", cam2file])
+    cam2url = 'http://192.168.8.157/cgi-bin/nph-zms?mode=single&monitor=2'
+
+    cam3tempfullfilename = os.path.join('assets', 'cam3_temp.jpg')
+    cam3file = str(uuid.uuid4()) + '.jpg'
+    cam3fullfilename = os.path.join(*["assets", cam3file])
+    cam3url = 'http://185.102.215.186/current/129copyright!/sergelstorg_live.jpg'
+
+    urllib.request.urlretrieve(cam1url, cam1tempfullfilename)
+    urllib.request.urlretrieve(cam2url, cam2tempfullfilename)
+    urllib.request.urlretrieve(cam3url, cam3tempfullfilename)
+
+    img = Image.open(cam1tempfullfilename)
+    img = img.resize(size)
+    img.save(cam1fullfilename)
+
+    img = Image.open(cam2tempfullfilename)
+    img = img.resize(size)
+    img.save(cam2fullfilename)
+
+    img = Image.open(cam3tempfullfilename)
+    img = img.resize(size)
+    img.save(cam3fullfilename)
+
+    #some cleanup
+
+    os.remove(cam1tempfullfilename)
+    os.remove(cam2tempfullfilename)
+    os.remove(cam3tempfullfilename)
+
+    #return the pictures in div
+
     return html.Div([
             html.Img(
-                src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=1&scale=20&maxfps=0.1&buffer=1000',
+                src = app.get_asset_url (cam1file)
             ),
             html.Img(
-                src='http://192.168.8.157/cgi-bin/nph-zms?mode=jpeg&monitor=2&scale=20&maxfps=0.1&buffer=1000', style={'margin-left': '5px'}
+                src = app.get_asset_url (cam2file)
             ),
             html.Img(
-                src=public_url, style={'margin-left': '5px', 'height':'10.57%', 'width':'10.7%'}
+                src = app.get_asset_url (cam3file)
             ),
-            ], style={'textAlign': 'right', 'color':'white', 'margin-left': '5px'},
+            ], style={'display': 'inline-block'},
         )
 
 
@@ -83,7 +177,7 @@ def display_cams(n):
     )
 def display_time(n):
     style = {'padding': '5px', 'fontSize': '20px', 'color':'white', 'font-weight': 'bold'}
-    return html.Span("Call No.: {}; Call at: {}; Refresh Rate: {:.0f} sec".format(n, str(datetime.datetime.now()), refresh_rate/1000, style=style))
+    return html.Span("   (Call No.: {}, API Call at: {}, Refresh Rate: {:.0f} sec)".format(n, str(datetime.now()), refresh_rate/1000, style=style))
 
 
 @app.callback(
