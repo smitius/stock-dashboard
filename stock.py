@@ -116,6 +116,7 @@ def display_cams(n):
 
     #donwload, process the images and store it in assets 
     size = (250, 125)
+    size_detector = (180, 125)
 
     cam1tempfullfilename = os.path.join('assets', 'cam1_temp.jpg')
     cam1file = str(uuid.uuid4()) + '.jpg'
@@ -132,9 +133,22 @@ def display_cams(n):
     cam3fullfilename = os.path.join(*["assets", cam3file])
     cam3url = 'http://185.102.215.186/current/129copyright!/sergelstorg_live.jpg'
 
+    cam4tempfullfilename = os.path.join('assets', 'cam4_temp.jpg')
+    cam4file = str(uuid.uuid4()) + '.jpg'
+    cam4fullfilename = os.path.join(*["assets", cam4file])
+    cam4url = 'http://192.168.8.162:8000/recognized.jpg'
+
     urllib.request.urlretrieve(cam1url, cam1tempfullfilename)
     urllib.request.urlretrieve(cam2url, cam2tempfullfilename)
     urllib.request.urlretrieve(cam3url, cam3tempfullfilename)
+    try:
+        urllib.request.urlretrieve(cam4url, cam4tempfullfilename)
+        img = Image.open(cam4tempfullfilename)
+        img = img.resize(size_detector)
+        img.save(cam4fullfilename)
+        os.remove(cam4tempfullfilename)
+    except:
+        pass
 
     img = Image.open(cam1tempfullfilename)
     img = img.resize(size)
@@ -148,11 +162,14 @@ def display_cams(n):
     img = img.resize(size)
     img.save(cam3fullfilename)
 
+    
+
     #some cleanup
 
     os.remove(cam1tempfullfilename)
     os.remove(cam2tempfullfilename)
     os.remove(cam3tempfullfilename)
+    
 
     #return the pictures in div
 
@@ -165,6 +182,9 @@ def display_cams(n):
             ),
             html.Img(
                 src = app.get_asset_url (cam3file)
+            ),
+            html.Img(
+                src = app.get_asset_url (cam4file)
             ),
             ], style={'display': 'inline-block'},
         )
