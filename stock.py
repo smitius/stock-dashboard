@@ -249,6 +249,7 @@ def update_stocks_live(n_clicks, value, n):
         return
 
     #get values 
+    starting_price = round(df['Close'].iloc[0], 2) 
     price = round(df['Close'].iloc[-1], 2)
     name = data.info['longName']
     current_time = df.index[-1]
@@ -364,11 +365,20 @@ def update_stocks_live(n_clicks, value, n):
                     
 
     # Make the title dynamic to reflect which stock we are analyzing
-    fig.update_layout(
-        title= str(name)+' : ' + '<b>' + str(price) + '</b>' + ' USD   Last Time: ' + str(current_time),
-        yaxis_title='Stock Price (USD per Shares)',
-        title_font_size=30
-        ) 
+    if price >= starting_price:
+        #if latest price is higher than the starting one, use green
+        fig.update_layout(
+            title= str(name)+' : ' + '<b style="color:green">' + str(price) + '</b>' + ' USD   Last value at: ' + str(current_time),
+            yaxis_title='Stock Price (USD per Shares)',
+            title_font_size=30
+            )
+    else:
+        #use red
+        fig.update_layout(
+            title= str(name)+' : ' + '<b style="color:red">' + str(price) + '</b>' + ' USD   Last value at: ' + str(current_time),
+            yaxis_title='Stock Price (USD per Shares)',
+            title_font_size=30
+            ) 
 
     # update y-axis label
     fig.update_yaxes(title_text="Price", row=1, col=1)
