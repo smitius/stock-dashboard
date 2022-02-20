@@ -33,6 +33,10 @@ import plotly.io as pio
 
 pio.templates.default = "plotly_dark" 
 
+# set global timeout for urllib and network comms
+import socket
+socket.setdefaulttimeout(5) # 5 seconds max timeout
+
 
 # Reading json config file once
 json_file_path = "assets/config.json"
@@ -106,6 +110,9 @@ def display_weather(n):
     [Input(component_id ='interval-component', component_property= 'n_intervals')]
     )
 def display_cams(n):
+    #define sizes
+    size = (250, 125)
+    size_detector = (180, 125)
     #remove all previous images if present
     files_in_directory = os.listdir('assets')
     filtered_files = [file for file in files_in_directory if file.endswith(".jpg")]
@@ -115,80 +122,39 @@ def display_cams(n):
         os.remove(path_to_file)
 
     #donwload, process the images and store it in assets 
-    size = (250, 125)
-    size_detector = (180, 125)
+    urls = ['http://192.168.8.157/cgi-bin/nph-zms?mode=single&monitor=1', 'http://192.168.8.157/cgi-bin/nph-zms?mode=single&monitor=2', 'http://185.102.215.186/current/129copyright!/sergelstorg_live.jpg', 'http://192.168.8.162:8000/recognized.jpg' ]
+    tempFiles = []
+    finalFiles = []
 
-    cam1tempfullfilename = os.path.join('assets', 'cam1_temp.jpg')
-    cam1file = str(uuid.uuid4()) + '.jpg'
-    cam1fullfilename = os.path.join(*["assets",cam1file])
-    cam1url = 'http://192.168.8.157/cgi-bin/nph-zms?mode=single&monitor=1'
+    for url in urls:
+        tempFiles.append(os.path.join(*["assets", str(uuid.uuid4()) + '_temp.jpg']))
 
-    cam2tempfullfilename = os.path.join('assets', 'cam2_temp.jpg')
-    cam2file = str(uuid.uuid4()) + '.jpg'
-    cam2fullfilename = os.path.join(*["assets", cam2file])
-    cam2url = 'http://192.168.8.157/cgi-bin/nph-zms?mode=single&monitor=2'
+    for item in zip(urls, tempFiles):
+        try:
+            resp = urllib.request.urlretrieve(item[0], item[1])
+            #finalFiles.append(os.path.join(*["assets", str(uuid.uuid4()) + '.jpg']))
+            finalFiles.append(os.path.join(str(uuid.uuid4()) + '.jpg'))
+            #resize and save
+            img = Image.open(item[1])
+            img = img.resize(size)
+            img.save(f"{os.path.join('assets')}/{finalFiles[-1]}")
+            #cleanup
+            os.remove(item[1])
+        except urllib.error.URLError as e:
+            if not hasattr(e, "code"):
+                raise
+            resp = e
+            print("Problem: " + str(resp.reason))
+            #replace the file with the novideo.png placeholder
+            finalFiles.append(os.path.join('novideo.png'))
 
-    cam3tempfullfilename = os.path.join('assets', 'cam3_temp.jpg')
-    cam3file = str(uuid.uuid4()) + '.jpg'
-    cam3fullfilename = os.path.join(*["assets", cam3file])
-    cam3url = 'http://185.102.215.186/current/129copyright!/sergelstorg_live.jpg'
 
-    cam4tempfullfilename = os.path.join('assets', 'cam4_temp.jpg')
-    cam4file = str(uuid.uuid4()) + '.jpg'
-    cam4fullfilename = os.path.join(*["assets", cam4file])
-    cam4url = 'http://192.168.8.162:8000/recognized.jpg'
-
-    urllib.request.urlretrieve(cam1url, cam1tempfullfilename)
-    urllib.request.urlretrieve(cam2url, cam2tempfullfilename)
-    urllib.request.urlretrieve(cam3url, cam3tempfullfilename)
-    try:
-        urllib.request.urlretrieve(cam4url, cam4tempfullfilename)
-        img = Image.open(cam4tempfullfilename)
-        img = img.resize(size_detector)
-        img.save(cam4fullfilename)
-        os.remove(cam4tempfullfilename)
-    except:
-        pass
-
-    img = Image.open(cam1tempfullfilename)
-    img = img.resize(size)
-    img.save(cam1fullfilename)
-
-    img = Image.open(cam2tempfullfilename)
-    img = img.resize(size)
-    img.save(cam2fullfilename)
-
-    img = Image.open(cam3tempfullfilename)
-    img = img.resize(size)
-    img.save(cam3fullfilename)
-
-    
-
-    #some cleanup
-
-    os.remove(cam1tempfullfilename)
-    os.remove(cam2tempfullfilename)
-    os.remove(cam3tempfullfilename)
-    
-
-    #return the pictures in div
-
-    return html.Div([
-            html.Img(
-                src = app.get_asset_url (cam1file)
-            ),
-            html.Img(
-                src = app.get_asset_url (cam2file)
-            ),
-            html.Img(
-                src = app.get_asset_url (cam3file)
-            ),
-            html.Img(
-                src = app.get_asset_url (cam4file)
-            ),
-            ], style={'display': 'inline-block'},
-        )
-
+    #return the pictures in div list
+    camerafeed = []
+    for item in finalFiles:
+        camerafeed.append(html.Img(src = app.get_asset_url(item)))
+    print(camerafeed)
+    return html.Div(camerafeed, style={'display': 'inline-block'})
 
 
 @app.callback(
@@ -337,7 +303,6 @@ def update_stocks_live(n_clicks, value, n):
 
 
     #Calculate Min and Max on the long term chart and plot the points
-    #
     maxindex = df_long['Close'].idxmax()
     minindex = df_long['Close'].idxmin()
 
