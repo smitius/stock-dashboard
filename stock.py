@@ -201,8 +201,6 @@ def update_stocks_live(n_clicks, value, n):
 
     print("Trying Ticker: " + value)
     try: 
-        #df = yf.download(tickers=value,period='1d',interval='1m', threads = True, prepost= True)
-        
         data = yf.Ticker(value)
         df = data.history(period='1d',interval='1m')
 
@@ -210,7 +208,6 @@ def update_stocks_live(n_clicks, value, n):
         df_long = df_long.reset_index()
         
     except KeyError:  # catch unspecific or specific errors/exceptions
-        # handling this error type begins here: print and return
         print("Error: Bad response from YFinance! Ticker:" + value)
         return
 
@@ -301,7 +298,6 @@ def update_stocks_live(n_clicks, value, n):
                             fill='tozeroy'
                             ), row=5, col=1)
 
-
     #Calculate Min and Max on the long term chart and plot the points
     maxindex = df_long['Close'].idxmax()
     minindex = df_long['Close'].idxmin()
@@ -328,7 +324,6 @@ def update_stocks_live(n_clicks, value, n):
                     showlegend=False, 
                     xaxis_rangeslider_visible=False)
                     
-
     # Make the title dynamic to reflect which stock we are analyzing
     if price >= starting_price:
         #if latest price is higher than the starting one, use green
@@ -366,7 +361,6 @@ def update_stocks_live(n_clicks, value, n):
         )
     )
     return fig
-    
 
 if __name__ == '__main__':
     app.run_server()
