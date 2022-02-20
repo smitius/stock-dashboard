@@ -1,6 +1,5 @@
 import datetime
 import json
-import random
 from re import template
 from turtle import color
 from unicodedata import mirrored
@@ -18,6 +17,7 @@ import urllib.request
 import os
 import uuid
 from datetime import datetime
+import time
 
 #for reading json data
 from urllib.request import urlopen
@@ -35,7 +35,7 @@ pio.templates.default = "plotly_dark"
 
 # set global timeout for urllib and network comms
 import socket
-socket.setdefaulttimeout(5) # 5 seconds max timeout
+socket.setdefaulttimeout(10) # 5 seconds max timeout
 
 
 # Reading json config file once
@@ -54,12 +54,14 @@ server = app.server
 #starting ticker
 stock ="COIN"
 
+loading_style = {'position': 'absolute', 'align-self': 'center'}
+
 app.layout = html.Div(
     html.Div([
         html.Div(id='display-cams', style={'display': 'inline-block'}),
         html.Div(id='display-weather', style={'display': 'inline-block', 'margin-left': '10px'}),
         html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Go Next", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}) ], style={'textAlign': 'left'}),
-        dcc.Graph(id='live-update-stocks', style={'width': '1vh', 'height': '1vh'}),
+        html.Div([dcc.Graph(id='live-update-stocks'), dcc.Loading(id='loading', parent_style=loading_style)], style= {'position': 'relative', 'display': 'flex', 'justify-content': 'center'}),
         dcc.Interval(
             id='interval-component',
             interval=1*60000, # in milliseconds
@@ -67,6 +69,8 @@ app.layout = html.Div(
         ),
     ])
 )
+
+
 
 @app.callback(
     Output(component_id ='display-weather', component_property= 'children'),
@@ -132,7 +136,6 @@ def display_cams(n):
     for item in zip(urls, tempFiles):
         try:
             resp = urllib.request.urlretrieve(item[0], item[1])
-            #finalFiles.append(os.path.join(*["assets", str(uuid.uuid4()) + '.jpg']))
             finalFiles.append(os.path.join(str(uuid.uuid4()) + '.jpg'))
             #resize and save
             img = Image.open(item[1])
@@ -141,8 +144,6 @@ def display_cams(n):
             #cleanup
             os.remove(item[1])
         except urllib.error.URLError as e:
-            if not hasattr(e, "code"):
-                raise
             resp = e
             print("Problem: " + str(resp.reason))
             #replace the file with the novideo.png placeholder
@@ -192,13 +193,14 @@ def update_output_div(n_clicks, value, n):
 
 
 @app.callback(
-    Output(component_id='live-update-stocks', component_property='figure'),
+    [Output(component_id='live-update-stocks', component_property='figure'),
+    Output('loading', 'parent_style')],
     [Input(component_id='submit-button', component_property='n_clicks')],
     [dash.dependencies.State(component_id="my-input", component_property="value")],
     [Input(component_id = 'interval-component', component_property = 'n_intervals')]
 )
 def update_stocks_live(n_clicks, value, n):
-
+    new_loading_style = loading_style
     print("Trying Ticker: " + value)
     try: 
         data = yf.Ticker(value)
@@ -360,7 +362,7 @@ def update_stocks_live(n_clicks, value, n):
             ])
         )
     )
-    return fig
+    return fig, new_loading_style
 
 if __name__ == '__main__':
     app.run_server()
