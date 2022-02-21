@@ -38,7 +38,7 @@ pio.templates.default = "plotly_dark"
 
 # set global timeout for urllib and network comms
 import socket
-socket.setdefaulttimeout(10) # 5 seconds max timeout
+socket.setdefaulttimeout(15) # 15 seconds max timeout
 
 # Reading json auth file 
 json_file_path = "assets/auth.json"
@@ -84,6 +84,7 @@ app.layout = html.Div(
     html.Div([
         html.Div(id='display-cams', style={'display': 'inline-block', 'border': '1px solid white', 'position': 'relative', 'justify-content': 'center'}),
         html.Div(id='display-weather', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
+        html.Div(id='display-weather-ext', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
         html.Div(id='display-clock', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
         html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Next", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}) ], style={'textAlign': 'left'}),
         html.Div([dcc.Graph(id='live-update-stocks'), dcc.Loading(id='loading', parent_style=loading_style)], style= {'position': 'relative', 'display': 'flex', 'justify-content': 'center'}),
@@ -127,6 +128,33 @@ def display_clock(n):
 
 
 @app.callback(
+    Output(component_id ='display-weather-ext', component_property= 'children'),
+    [Input(component_id ='interval-component', component_property= 'n_intervals')]
+    )
+def display_weather_ext(n):
+    #get weather data from Blynk
+
+    return html.Div([
+            html.P(
+                'External Weather Station'
+            ),
+            html.P(
+                'Temperature: 3'  + ' °C'
+            ),
+            html.P(
+                'Humidity: 45' + ' %'
+            ),
+            html.P(
+                'Pressure: 996' +  ' hPa'
+            ),
+            html.P(
+                'Luminosity: 695' + ' lux'
+            ),
+            ], style={'text-align':'right', 'color':'#FFFF00', 'font-weight': 'bold', 'fontSize': '15px', 'padding': '3px'},
+        )
+
+
+@app.callback(
     Output(component_id ='display-weather', component_property= 'children'),
     [Input(component_id ='interval-component', component_property= 'n_intervals')]
     )
@@ -143,6 +171,9 @@ def display_weather(n):
     humidity = data_json['widgets'][4]['value']
 
     return html.Div([
+            html.P(
+                'Patio Weather Station'
+            ),
             html.P(
                 'Temperature: ' + str(round(float(temperature),1)) + ' °C'
             ),
@@ -266,6 +297,8 @@ def update_stocks_live(n_clicks, value, n):
     #get values 
     starting_price = round(df['Close'].iloc[0], 2) 
     price = round(df['Close'].iloc[-1], 2)
+    deltaPrice = abs(round(starting_price - price, 2))
+
     try:
         name = data.info['longName']
         if str(name) == "None":
@@ -365,7 +398,7 @@ def update_stocks_live(n_clicks, value, n):
     min = df_long.loc[[minindex]]
 
     result = pandas.concat([max, min])
-    extremeValues = [result.iat[0,2], result.iat[1,3]]
+    extremeValues = [round(result.iat[0,2],2), round(result.iat[1,3],2)]
     result['Extreme'] = extremeValues
 
     #x=result.index
@@ -388,14 +421,14 @@ def update_stocks_live(n_clicks, value, n):
     if price >= starting_price:
         #if latest price is higher than the starting one, use green
         fig.update_layout(
-            title= str(name)+' : ' + '<b style="color:green">' + str(price) + '</b> ' + currency,
+            title= str(name)+' : ' + '<b style="color:green">' + str(price) + '</b> ' + currency + '<b style="color:green">  (Δ ' + str(deltaPrice) +')</b>',
             yaxis_title='Stock Price (USD per Shares)',
             title_font_size=30
             )
     else:
         #use red
         fig.update_layout(
-            title= str(name)+' : ' + '<b style="color:red">' + str(price) + '</b> ' + currency,
+            title= str(name)+' : ' + '<b style="color:red">' + str(price) + '</b> ' + currency + '<b style="color:red">  (Δ ' + str(deltaPrice) +')</b>',
             yaxis_title='Stock Price (USD per Shares)',
             title_font_size=30
             ) 
