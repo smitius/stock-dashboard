@@ -1,4 +1,9 @@
 {
-    "stocks": ["COIN","BABA", "NIO", "AMZN","BIDU","JMIA","T","EDIT","JD","LCID","FB","MSFT","NRZ","PLTR","PYPL","PFE","RKLB","WMT","NFLX","GGPI", "ETH-USD", "BTC-USD"],
-    "refresh_rate": 35000
+    "stocks": ["COIN","BABA", "NIO", "AMZN","BIDU","JMIA","T","EDIT","JD","LCID","FB","MSFT","NRZ","PLTR","PYPL","PFE","RKLB","WMT","NFLX","GGPI"],
+    "refresh_rate": 30000,
+    "camera_sources": ["http://192.168.8.157/cgi-bin/nph-zms?mode=single&monitor=1", "http://192.168.8.157/cgi-bin/nph-zms?mode=single&monitor=2", "http://185.102.215.186/current/129copyright!/sergelstorg_live.jpg", "http://192.168.8.162:8000/recognized.jpg"],
+    "dimensions" : [{
+        "graph_height": 874,
+        "graph_width": 1890
+    }]
 }

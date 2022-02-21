@@ -3,9 +3,11 @@ import json
 from re import template
 from turtle import color
 from unicodedata import mirrored
+from unittest import result
 import dash
 from dash import html
 from dash import dcc
+import pandas
 import plotly
 from dash.dependencies import Input, Output
 from ta.trend import MACD
@@ -17,7 +19,7 @@ import urllib.request
 import os
 import uuid
 from datetime import datetime
-import time
+
 
 #for reading json data
 from urllib.request import urlopen
@@ -43,8 +45,10 @@ json_file_path = "assets/config.json"
 with open(json_file_path) as f:
     data = json.load(f)
 
+#set refresh frequency
 refresh_rate = data['refresh_rate']
-print(refresh_rate)
+gHeight = data['dimensions'][0]['graph_height']
+gWidth = data['dimensions'][0]['graph_width']
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -56,11 +60,15 @@ stock ="COIN"
 
 loading_style = {'position': 'absolute', 'align-self': 'center'}
 
+########################
+# Layout section
+########################
+
 app.layout = html.Div(
     html.Div([
-        html.Div(id='display-cams', style={'display': 'inline-block'}),
-        html.Div(id='display-weather', style={'display': 'inline-block', 'margin-left': '10px'}),
-        html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Go Next", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}) ], style={'textAlign': 'left'}),
+        html.Div(id='display-cams', style={'display': 'inline-block', 'border': '1px solid white', 'position': 'relative', 'justify-content': 'center'}),
+        html.Div(id='display-weather', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
+        html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Next", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}) ], style={'textAlign': 'left'}),
         html.Div([dcc.Graph(id='live-update-stocks'), dcc.Loading(id='loading', parent_style=loading_style)], style= {'position': 'relative', 'display': 'flex', 'justify-content': 'center'}),
         dcc.Interval(
             id='interval-component',
@@ -70,6 +78,23 @@ app.layout = html.Div(
     ])
 )
 
+########################
+# Helper Functions 
+########################
+
+def resizeImage(image, path):
+    """
+    This function just resizes an image and saves it to path.
+    Keeps original aspect ratio
+    """
+    size = (250, 125)
+    img = Image.open(image)
+    img.thumbnail(size, Image.ANTIALIAS)
+    img.save(path)
+
+########################
+# Callbacks section
+########################
 
 
 @app.callback(
@@ -87,9 +112,6 @@ def display_weather(n):
     luxmeter = data_json['widgets'][2]['value']
     pressure = data_json['widgets'][3]['value']
     humidity = data_json['widgets'][4]['value']
-
-    #print(round(float(temperature),1),luxmeter,pressure,humidity)
-
 
     return html.Div([
             html.P(
@@ -126,7 +148,7 @@ def display_cams(n):
         os.remove(path_to_file)
 
     #donwload, process the images and store it in assets 
-    urls = ['http://192.168.8.157/cgi-bin/nph-zms?mode=single&monitor=1', 'http://192.168.8.157/cgi-bin/nph-zms?mode=single&monitor=2', 'http://185.102.215.186/current/129copyright!/sergelstorg_live.jpg', 'http://192.168.8.162:8000/recognized.jpg' ]
+    urls = data['camera_sources']
     tempFiles = []
     finalFiles = []
 
@@ -138,9 +160,8 @@ def display_cams(n):
             resp = urllib.request.urlretrieve(item[0], item[1])
             finalFiles.append(os.path.join(str(uuid.uuid4()) + '.jpg'))
             #resize and save
-            img = Image.open(item[1])
-            img = img.resize(size)
-            img.save(f"{os.path.join('assets')}/{finalFiles[-1]}")
+            resizeImage(item[1], f"{os.path.join('assets')}/{finalFiles[-1]}" )
+
             #cleanup
             os.remove(item[1])
         except urllib.error.URLError as e:
@@ -154,7 +175,6 @@ def display_cams(n):
     camerafeed = []
     for item in finalFiles:
         camerafeed.append(html.Img(src = app.get_asset_url(item)))
-    print(camerafeed)
     return html.Div(camerafeed, style={'display': 'inline-block'})
 
 
@@ -204,6 +224,7 @@ def update_stocks_live(n_clicks, value, n):
     print("Trying Ticker: " + value)
     try: 
         data = yf.Ticker(value)
+        currency = data.info['currency']
         df = data.history(period='1d',interval='1m')
 
         df_long = data.history('3mo')
@@ -217,7 +238,7 @@ def update_stocks_live(n_clicks, value, n):
     starting_price = round(df['Close'].iloc[0], 2) 
     price = round(df['Close'].iloc[-1], 2)
     name = data.info['longName']
-    current_time = df.index[-1]
+    #current_time = df.index[-1]
     df['MA5'] = df['Close'].rolling(window=5).mean()
     df['MA20'] = df['Close'].rolling(window=20).mean()
 
@@ -237,7 +258,7 @@ def update_stocks_live(n_clicks, value, n):
     fig=go.Figure()
 
     # add subplot properties when initializing fig variable
-    fig = plotly.subplots.make_subplots(rows=5, cols=1, shared_xaxes=True,
+    fig = plotly.subplots.make_subplots(rows=5, cols=1, shared_xaxes=False,
                         vertical_spacing=0.01, 
                         row_heights=[0.4,0.1,0.2,0.2,0.3],
                         )
@@ -295,7 +316,8 @@ def update_stocks_live(n_clicks, value, n):
                             ), row=4, col=1)
 
     # Plot 60 day stock price trace on 5th row
-    fig.add_trace(go.Scatter(x=df_long.index,
+    #x=df_long.index
+    fig.add_trace(go.Scatter(x=df_long['Date'],
                             y=df_long['Close'],
                             fill='tozeroy'
                             ), row=5, col=1)
@@ -307,14 +329,11 @@ def update_stocks_live(n_clicks, value, n):
     max1 = df_long.loc[[maxindex]]
     min = df_long.loc[[minindex]]
 
-    max1 = max1.append(min, ignore_index = False)
-
-    text = ['Max', 'Min']
-    max1['Extreme'] = text
-
-    fig.add_trace(go.Scatter(x=max1.index,
-                            y=max1['High'],
-                            text=max1['High'],
+    result = pandas.concat([max1, min])
+    #x=result.index
+    fig.add_trace(go.Scatter(x=result['Date'],
+                            y=result['High'],
+                            text=result['High'],
                             mode='lines+text',
                             line=dict(color='white', width=3),
                             textfont_size=14,
@@ -322,7 +341,8 @@ def update_stocks_live(n_clicks, value, n):
                             ), row=5, col=1)
 
     # update layout by changing the plot size, hiding legends & rangeslider, and removing gaps between dates
-    fig.update_layout(height=874, width=1890, 
+    
+    fig.update_layout(height=gHeight, width=gWidth, 
                     showlegend=False, 
                     xaxis_rangeslider_visible=False)
                     
@@ -330,14 +350,14 @@ def update_stocks_live(n_clicks, value, n):
     if price >= starting_price:
         #if latest price is higher than the starting one, use green
         fig.update_layout(
-            title= str(name)+' : ' + '<b style="color:green">' + str(price) + '</b>' + ' USD   Last value at: ' + str(current_time),
+            title= str(name)+' : ' + '<b style="color:green">' + str(price) + '</b> ' + currency,
             yaxis_title='Stock Price (USD per Shares)',
             title_font_size=30
             )
     else:
         #use red
         fig.update_layout(
-            title= str(name)+' : ' + '<b style="color:red">' + str(price) + '</b>' + ' USD   Last value at: ' + str(current_time),
+            title= str(name)+' : ' + '<b style="color:red">' + str(price) + '</b> ' + currency,
             yaxis_title='Stock Price (USD per Shares)',
             title_font_size=30
             ) 
