@@ -5,6 +5,7 @@ from turtle import color
 from unicodedata import mirrored
 from unittest import result
 import dash
+import dash_auth
 from dash import html
 from dash import dcc
 import pandas
@@ -39,6 +40,10 @@ pio.templates.default = "plotly_dark"
 import socket
 socket.setdefaulttimeout(10) # 5 seconds max timeout
 
+# Reading json auth file 
+json_file_path = "assets/auth.json"
+with open(json_file_path) as f:
+    users = json.load(f)
 
 # Reading json config file once
 json_file_path = "assets/config.json"
@@ -54,6 +59,10 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.title = "Dash.board"
 server = app.server
+auth = dash_auth.BasicAuth(
+    app,
+    users
+)
 
 #starting ticker
 stock ="COIN"
