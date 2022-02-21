@@ -136,9 +136,6 @@ def display_weather_ext(n):
 
     return html.Div([
             html.P(
-                'External Weather Station'
-            ),
-            html.P(
                 'Temperature: 3'  + ' °C'
             ),
             html.P(
@@ -171,9 +168,6 @@ def display_weather(n):
     humidity = data_json['widgets'][4]['value']
 
     return html.Div([
-            html.P(
-                'Patio Weather Station'
-            ),
             html.P(
                 'Temperature: ' + str(round(float(temperature),1)) + ' °C'
             ),
