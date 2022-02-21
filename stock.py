@@ -84,6 +84,7 @@ app.layout = html.Div(
     html.Div([
         html.Div(id='display-cams', style={'display': 'inline-block', 'border': '1px solid white', 'position': 'relative', 'justify-content': 'center'}),
         html.Div(id='display-weather', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
+        html.Div(id='display-clock', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
         html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Next", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}) ], style={'textAlign': 'left'}),
         html.Div([dcc.Graph(id='live-update-stocks'), dcc.Loading(id='loading', parent_style=loading_style)], style= {'position': 'relative', 'display': 'flex', 'justify-content': 'center'}),
         dcc.Interval(
@@ -111,6 +112,18 @@ def resizeImage(image, path):
 ########################
 # Callbacks section
 ########################
+
+@app.callback(
+    Output(component_id ='display-clock', component_property= 'children'),
+    [Input(component_id ='interval-component', component_property= 'n_intervals')]
+    )
+def display_clock(n):
+    time = datetime.now().strftime('%d %b %Y %H:%M:%S')
+
+    return html.Div([
+            time
+            ], style={'text-align':'right', 'color':'#006400', 'font-weight': 'bold', 'fontSize': '50px', 'padding': '1px', 'verticalAlign': 'center'},
+        )
 
 
 @app.callback(
@@ -255,6 +268,8 @@ def update_stocks_live(n_clicks, value, n):
     price = round(df['Close'].iloc[-1], 2)
     try:
         name = data.info['longName']
+        if str(name) == "None":
+            name = value
     except KeyError:
         name = value
     
@@ -343,17 +358,20 @@ def update_stocks_live(n_clicks, value, n):
                             ), row=5, col=1)
 
     #Calculate Min and Max on the long term chart and plot the points
-    maxindex = df_long['Close'].idxmax()
-    minindex = df_long['Close'].idxmin()
+    maxindex = df_long['High'].idxmax()
+    minindex = df_long['Low'].idxmin()
 
-    max1 = df_long.loc[[maxindex]]
+    max = df_long.loc[[maxindex]]
     min = df_long.loc[[minindex]]
 
-    result = pandas.concat([max1, min])
+    result = pandas.concat([max, min])
+    extremeValues = [result.iat[0,2], result.iat[1,3]]
+    result['Extreme'] = extremeValues
+
     #x=result.index
     fig.add_trace(go.Scatter(x=result['Date'],
-                            y=result['High'],
-                            text=result['High'],
+                            y=result['Extreme'],
+                            text=result['Extreme'],
                             mode='lines+text',
                             line=dict(color='white', width=3),
                             textfont_size=14,
