@@ -55,14 +55,21 @@ refresh_rate = data['refresh_rate']
 gHeight = data['dimensions'][0]['graph_height']
 gWidth = data['dimensions'][0]['graph_width']
 
+authentication = data['basicAuthentication']
+
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.title = "Dash.board"
 server = app.server
-auth = dash_auth.BasicAuth(
-    app,
-    users
-)
+
+#enable authentication if the setting is true
+print("Auth enabled? : " + str(authentication))
+
+if authentication == "True":
+    auth = dash_auth.BasicAuth(
+        app,
+        users
+    )
 
 #starting ticker
 stock ="COIN"
@@ -246,7 +253,11 @@ def update_stocks_live(n_clicks, value, n):
     #get values 
     starting_price = round(df['Close'].iloc[0], 2) 
     price = round(df['Close'].iloc[-1], 2)
-    name = data.info['longName']
+    try:
+        name = data.info['longName']
+    except KeyError:
+        name = value
+    
     #current_time = df.index[-1]
     df['MA5'] = df['Close'].rolling(window=5).mean()
     df['MA20'] = df['Close'].rolling(window=20).mean()
