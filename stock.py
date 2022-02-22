@@ -84,7 +84,7 @@ app.layout = html.Div(
     html.Div([
         html.Div(id='display-cams', style={'display': 'inline-block', 'border': '1px solid white', 'position': 'relative', 'justify-content': 'center'}),
         html.Div(id='display-weather', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
-        html.Div(id='display-weather-ext', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
+        #html.Div(id='display-weather-ext', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
         html.Div(id='display-clock', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
         html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Next", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}) ], style={'textAlign': 'left'}),
         html.Div([dcc.Graph(id='live-update-stocks'), dcc.Loading(id='loading', parent_style=loading_style)], style= {'position': 'relative', 'display': 'flex', 'justify-content': 'center'}),
@@ -190,9 +190,6 @@ def display_weather(n):
     [Input(component_id ='interval-component', component_property= 'n_intervals')]
     )
 def display_cams(n):
-    #define sizes
-    size = (250, 125)
-    size_detector = (180, 125)
     #remove all previous images if present
     files_in_directory = os.listdir('assets')
     filtered_files = [file for file in files_in_directory if file.endswith(".jpg")]
