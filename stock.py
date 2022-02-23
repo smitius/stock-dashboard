@@ -25,6 +25,9 @@ from datetime import datetime
 #for reading json data
 from urllib.request import urlopen
 
+import re
+from bs4 import BeautifulSoup
+
 # Market Data 
 import yfinance as yf
 
@@ -219,6 +222,27 @@ def display_cams(n):
             resp = e
             print("Problem: " + str(resp.reason))
             #replace the file with the novideo.png placeholder
+
+            #Try if this is rotating url from public cameras
+            #Try getting the right url first
+            # try:
+            #     headers = {'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"}
+            #     print("will check for new URL")
+            #     print(item[0])
+            #     #response = requests.request("GET", url, headers=headers, auth=('guest','guest'))
+            #     response = urllib.request.urlopen(item[0]).read()
+                
+            #     bsdata = BeautifulSoup(response, 'html.parser')
+            #     # find all with the image tag and regexp for somethin live.jpg
+            #     newimages = bsdata.find_all('img', src=re.compile("live.jpg"))
+            #     print('Number of Images: ', len(newimages))
+            #     for image in newimages:
+            #         print(image['src'])
+
+            #     finalFiles.append(os.path.join('novideo.png'))
+
+            # except:
+                #if all fails then add the no video screen
             finalFiles.append(os.path.join('novideo.png'))
 
 
