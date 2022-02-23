@@ -25,8 +25,8 @@ from datetime import datetime
 #for reading json data
 from urllib.request import urlopen
 
-import re
-from bs4 import BeautifulSoup
+#import re
+#from bs4 import BeautifulSoup
 
 # Market Data 
 import yfinance as yf
