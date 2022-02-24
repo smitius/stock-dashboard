@@ -1,7 +1,8 @@
 {
     "stocks": ["COIN","ETH-USD","BTC-USD","LAZR","PDD","TSLA","WDP.DE","AHLA.DE", "NIO", "AMZ.F","BIDU","JMIA","T","EDIT","JD","LCID","FB","MSFT","NRZ","PLTR","2PP.DE","PFE","RKLB","WMT","NFLX","GGPI"],
     "refresh_rate": 30000,
-    "camera_sources": ["http://192.168.8.220/image/patio?user=guest&pw=guest&q=100", "http://192.168.8.220/image/garden?user=guest&pw=guest&q=100", "http://185.102.215.186/current/257copyright!/sergelstorg_live.jpg","https://webcam2.virtualna-banska-stiavnica.sk/public.jpg", "http://www.krasybezhranic.eu/streem/skalica_mesto.jpg", "http://192.168.8.162:8000/recognized.jpg"],
+    "camera_scrapers": ["http://www.webbkameror.se/webbkameror/sergelstorg/"],
+    "camera_sources": ["http://192.168.8.220/image/patio?user=guest&pw=guest&q=100", "http://192.168.8.220/image/garden?user=guest&pw=guest&q=100","https://webcam2.virtualna-banska-stiavnica.sk/public.jpg", "http://www.krasybezhranic.eu/streem/skalica_mesto.jpg", "http://192.168.8.162:8000/recognized.jpg"],
     "dimensions" : [{
         "graph_height": 874,
         "graph_width": 1890

@@ -1,3 +1,9 @@
+## 
+# Todo: on thumb click enlarge cams: something like this http://jsfiddle.net/m912gh5c/2/ 
+#
+##
+
+
 import datetime
 import json
 from re import template
@@ -25,8 +31,10 @@ from datetime import datetime
 #for reading json data
 from urllib.request import urlopen
 
-#import re
-#from bs4 import BeautifulSoup
+#for scraping
+import re
+from bs4 import BeautifulSoup
+import requests as rq
 
 # Market Data 
 import yfinance as yf
@@ -112,6 +120,26 @@ def resizeImage(image, path):
     img = Image.open(image)
     img.thumbnail(size, Image.ANTIALIAS)
     img.save(path)
+
+def getCameraUrl(page, searchString):
+    """
+    Some public cameras rotate urls so one moust
+    scrape the web page for the right url to the stream.
+    """
+    headers = {
+    'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
+    }
+    response = rq.request("GET", page, headers=headers)
+    data = BeautifulSoup(response.text, 'html.parser')
+    images = data.find_all('img', src=re.compile(searchString))
+    
+    #ideally we want only one image, return the one that is first 
+    if(len(images)) != 1:
+        print('[PROB] Found none or multiple images witht the search string:', len(images))
+        return None
+    else:
+        #return the first url
+        return images[0]['src']
 
 ########################
 # Callbacks section
@@ -201,8 +229,26 @@ def display_cams(n):
         path_to_file = os.path.join('assets', file)
         os.remove(path_to_file)
 
+
+    #Check if we have some cameras that need scrape, if yes scrape and add the correct url to the list
+    newUrl = []
+    publicUrls = data["camera_scrapers"]
+    #print("Public URLs")
+    #print(publicUrls)
+    
+    if publicUrls:
+        for pUrl in publicUrls:
+            searchString = 'live.jpg'
+            newUrl.append(getCameraUrl(pUrl, searchString))
+
     #donwload, process the images and store it in assets 
     urls = data['camera_sources']
+    #is there was scraped url found, 
+    if len(newUrl) != 0: 
+        urls = urls + newUrl
+    
+    #print("List of URLs ")
+    #print(urls)
     tempFiles = []
     finalFiles = []
 
@@ -221,28 +267,6 @@ def display_cams(n):
         except urllib.error.URLError as e:
             resp = e
             print("Problem: " + str(resp.reason))
-            #replace the file with the novideo.png placeholder
-
-            #Try if this is rotating url from public cameras
-            #Try getting the right url first
-            # try:
-            #     headers = {'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"}
-            #     print("will check for new URL")
-            #     print(item[0])
-            #     #response = requests.request("GET", url, headers=headers, auth=('guest','guest'))
-            #     response = urllib.request.urlopen(item[0]).read()
-                
-            #     bsdata = BeautifulSoup(response, 'html.parser')
-            #     # find all with the image tag and regexp for somethin live.jpg
-            #     newimages = bsdata.find_all('img', src=re.compile("live.jpg"))
-            #     print('Number of Images: ', len(newimages))
-            #     for image in newimages:
-            #         print(image['src'])
-
-            #     finalFiles.append(os.path.join('novideo.png'))
-
-            # except:
-                #if all fails then add the no video screen
             finalFiles.append(os.path.join('novideo.png'))
 
 
