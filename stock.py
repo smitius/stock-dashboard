@@ -126,7 +126,7 @@ def display_clock(n):
 
     return html.Div([
             time
-            ], style={'text-align':'right', 'color':'#006400', 'font-weight': 'bold', 'fontSize': '50px', 'padding': '1px', 'verticalAlign': 'center'},
+            ], style={'text-align':'right', 'color':'#eb7734', 'font-weight': 'bold', 'fontSize': '40px', 'padding': '1px', 'verticalAlign': 'center'},
         )
 
 
