@@ -61,12 +61,12 @@ json_file_path = "assets/config.json"
 with open(json_file_path) as f:
     data = json.load(f)
 
-#set refresh frequency
+#load some params from config
 refresh_rate = data['refresh_rate']
 gHeight = data['dimensions'][0]['graph_height']
 gWidth = data['dimensions'][0]['graph_width']
-
 authentication = data['basicAuthentication']
+stock = data['stocks'][0] # pick first ticker from the list as starting point
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -82,8 +82,6 @@ if authentication == "True":
         users
     )
 
-#starting ticker
-stock ="COIN"
 
 loading_style = {'position': 'absolute', 'align-self': 'center'}
 
@@ -251,6 +249,7 @@ def display_cams(n):
     #print(urls)
     tempFiles = []
     finalFiles = []
+    camerafeed = []
 
     for url in urls:
         tempFiles.append(os.path.join(*["assets", str(uuid.uuid4()) + '_temp.jpg']))
@@ -262,8 +261,9 @@ def display_cams(n):
             #resize and save
             resizeImage(item[1], f"{os.path.join('assets')}/{finalFiles[-1]}" )
 
-            #cleanup
-            os.remove(item[1])
+            #cleanup - perhaps do not delete as we want to make the small pic expandable. we can delete at beginning 
+            #os.remove(item[1])
+            
         except urllib.error.URLError as e:
             resp = e
             print("Problem: " + str(resp.reason))
@@ -271,9 +271,18 @@ def display_cams(n):
 
 
     #return the pictures in div list
-    camerafeed = []
-    for item in finalFiles:
-        camerafeed.append(html.Img(src = app.get_asset_url(item)))
+    
+    for item in zip(finalFiles, tempFiles):
+        camerafeed.append(
+            html.A(
+            children=[
+            html.Img(
+                src= app.get_asset_url(item[0])
+            )
+            ], href=item[1])
+        )
+
+    print(camerafeed[0])
     return html.Div(camerafeed, style={'display': 'inline-block'})
 
 
