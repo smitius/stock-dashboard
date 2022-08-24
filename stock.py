@@ -69,7 +69,16 @@ authentication = data['basicAuthentication']
 stock = data['stocks'][0] # pick first ticker from the list as starting point
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+external_scripts = [
+    {
+        'src': 'https://kit.fontawesome.com/6cc05e1e8e.js',
+        'crossorigin': 'anonymous'
+    },
+]
+
+
+
+app = dash.Dash(__name__, external_scripts=external_scripts,external_stylesheets=external_stylesheets)
 app.title = "Dash.board"
 server = app.server
 
@@ -91,8 +100,9 @@ loading_style = {'position': 'absolute', 'align-self': 'center'}
 
 app.layout = html.Div(
     html.Div([
-        html.Div(id='display-cams', style={'display': 'inline-block', 'border': '1px solid white', 'position': 'relative', 'justify-content': 'center'}),
-        html.Div(id='display-weather', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
+        #html.Div(id='display-cameras'),
+        #html.Div(id='display-cams', style={'display': 'inline-block', 'border': '1px solid white', 'position': 'relative', 'justify-content': 'center'}),
+        #html.Div(id='display-weather', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
         #html.Div(id='display-weather-ext', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
         html.Div(id='display-clock', style={'display': 'inline-block', 'margin-left': '10px', 'position': 'relative', 'justify-content': 'center'}),
         html.Div([dcc.Input(id='my-input', value=stock, type='text', style={'verticalAlign': 'top', 'margin-left': '5px', 'margin-right': '5px'}), html.Button("Next", id="submit-button", style={'color':'white', 'verticalAlign': 'top'}, n_clicks=0), html.Span(id='live-update-stock-text'), html.Span(id='display-time', style={'color':'white', 'textAlign': 'right'}) ], style={'textAlign': 'left'}),
@@ -156,134 +166,208 @@ def display_clock(n):
         )
 
 
-@app.callback(
-    Output(component_id ='display-weather-ext', component_property= 'children'),
-    [Input(component_id ='interval-component', component_property= 'n_intervals')]
-    )
-def display_weather_ext(n):
-    #get weather data from Blynk
+# @app.callback(
+#     Output(component_id ='display-weather-ext', component_property= 'children'),
+#     [Input(component_id ='interval-component', component_property= 'n_intervals')]
+#     )
+# def display_weather_ext(n):
+#     #get weather data from Blynk
 
-    return html.Div([
-            html.P(
-                'Temperature: 3'  + ' °C'
-            ),
-            html.P(
-                'Humidity: 45' + ' %'
-            ),
-            html.P(
-                'Pressure: 996' +  ' hPa'
-            ),
-            html.P(
-                'Luminosity: 695' + ' lux'
-            ),
-            ], style={'text-align':'right', 'color':'#FFFF00', 'font-weight': 'bold', 'fontSize': '15px', 'padding': '3px'},
-        )
-
-
-@app.callback(
-    Output(component_id ='display-weather', component_property= 'children'),
-    [Input(component_id ='interval-component', component_property= 'n_intervals')]
-    )
-def display_weather(n):
-    #get weather data from Blynk
-    blynkUrl = 'http://blynk-cloud.com/Cr21xDVLueTUiz8MgFqCcayc2rDft_hD/project'
-
-    response = urlopen(blynkUrl)
-    data_json = json.loads(response.read())
-
-    temperature = data_json['widgets'][0]['value']
-    luxmeter = data_json['widgets'][2]['value']
-    pressure = data_json['widgets'][3]['value']
-    humidity = data_json['widgets'][4]['value']
-
-    return html.Div([
-            html.P(
-                'Temperature: ' + str(round(float(temperature),1)) + ' °C'
-            ),
-            html.P(
-                'Humidity: ' + str(round(float(humidity),1)) + ' %'
-            ),
-            html.P(
-                'Pressure: ' + str(round(float(pressure),1)) + ' hPa'
-            ),
-            html.P(
-                'Luminosity: ' + str(round(float(luxmeter),1)) + ' lux'
-            ),
-            ], style={'text-align':'right', 'color':'#33A5FF', 'font-weight': 'bold', 'fontSize': '15px', 'padding': '3px'},
-        )
+#     return html.Div([
+#             html.P(
+#                 'Temperature: 3'  + ' °C'
+#             ),
+#             html.P(
+#                 'Humidity: 45' + ' %'
+#             ),
+#             html.P(
+#                 'Pressure: 996' +  ' hPa'
+#             ),
+#             html.P(
+#                 'Luminosity: 695' + ' lux'
+#             ),
+#             ], style={'text-align':'right', 'color':'#FFFF00', 'font-weight': 'bold', 'fontSize': '15px', 'padding': '3px'},
+#         )
 
 
-#part where I update the cameras
-@app.callback(
-    Output(component_id ='display-cams', component_property= 'children'),
-    [Input(component_id ='interval-component', component_property= 'n_intervals')]
-    )
-def display_cams(n):
-    #remove all previous images if present
-    files_in_directory = os.listdir('assets')
-    filtered_files = [file for file in files_in_directory if file.endswith(".jpg")]
+# @app.callback(
+#     Output(component_id ='display-weather', component_property= 'children'),
+#     [Input(component_id ='interval-component', component_property= 'n_intervals')]
+#     )
+# def display_weather(n):
+#     #get weather data from Blynk
+#     blynkUrl = 'http://blynk-cloud.com/Cr21xDVLueTUiz8MgFqCcayc2rDft_hD/project'
 
-    for file in filtered_files:
-        path_to_file = os.path.join('assets', file)
-        os.remove(path_to_file)
+#     response = urlopen(blynkUrl)
+#     data_json = json.loads(response.read())
+
+#     temperature = data_json['widgets'][0]['value']
+#     luxmeter = data_json['widgets'][2]['value']
+#     pressure = data_json['widgets'][3]['value']
+#     humidity = data_json['widgets'][4]['value']
+
+#     return html.Div([
+#             html.P(
+#                 'Temperature: ' + str(round(float(temperature),1)) + ' °C'
+#             ),
+#             html.P(
+#                 'Humidity: ' + str(round(float(humidity),1)) + ' %'
+#             ),
+#             html.P(
+#                 'Pressure: ' + str(round(float(pressure),1)) + ' hPa'
+#             ),
+#             html.P(
+#                 'Luminosity: ' + str(round(float(luxmeter),1)) + ' lux'
+#             ),
+#             ], style={'text-align':'right', 'color':'#33A5FF', 'font-weight': 'bold', 'fontSize': '15px', 'padding': '3px'},
+#         )
+
+#new camera gallery
+
+# @app.callback(
+#     Output(component_id ='display-cameras', component_property= 'children'),
+#     [Input(component_id ='interval-component', component_property= 'n_intervals')]
+#     )
+# def display_cams(n):
+#     #remove all previous images if present
+#     files_in_directory = os.listdir('assets')
+#     filtered_files = [file for file in files_in_directory if file.endswith(".jpg")]
+
+#     for file in filtered_files:
+#         path_to_file = os.path.join('assets', file)
+#         os.remove(path_to_file)
 
 
-    #Check if we have some cameras that need scrape, if yes scrape and add the correct url to the list
-    newUrl = []
-    publicUrls = data["camera_scrapers"]
-    #print("Public URLs")
-    #print(publicUrls)
+#     #Check if we have some cameras that need scrape, if yes scrape and add the correct url to the list
+#     newUrl = []
+#     publicUrls = data["camera_scrapers"]
+#     #print("Public URLs")
+#     #print(publicUrls)
     
-    if publicUrls:
-        for pUrl in publicUrls:
-            searchString = 'live.jpg'
-            newUrl.append(getCameraUrl(pUrl, searchString))
+#     if publicUrls:
+#         for pUrl in publicUrls:
+#             searchString = 'live.jpg'
+#             newUrl.append(getCameraUrl(pUrl, searchString))
 
-    #donwload, process the images and store it in assets 
-    urls = data['camera_sources']
-    #is there was scraped url found, 
-    if len(newUrl) != 0: 
-        urls = urls + newUrl
+#     #donwload, process the images and store it in assets 
+#     urls = data['camera_sources']
+#     #is there was scraped url found, 
+#     if len(newUrl) != 0: 
+#         urls = urls + newUrl
     
-    #print("List of URLs ")
-    #print(urls)
-    tempFiles = []
-    finalFiles = []
-    camerafeed = []
+#     #print("List of URLs ")
+#     #print(urls)
+#     tempFiles = []
+#     finalFiles = []
+#     camerafeed = []
 
-    for url in urls:
-        tempFiles.append(os.path.join(*["assets", str(uuid.uuid4()) + '_temp.jpg']))
+#     for url in urls:
+#         tempFiles.append(os.path.join(*["assets", str(uuid.uuid4()) + '_temp.jpg']))
 
-    for item in zip(urls, tempFiles):
-        try:
-            resp = urllib.request.urlretrieve(item[0], item[1])
-            finalFiles.append(os.path.join(str(uuid.uuid4()) + '.jpg'))
-            #resize and save
-            resizeImage(item[1], f"{os.path.join('assets')}/{finalFiles[-1]}" )
+#     for item in zip(urls, tempFiles):
+#         try:
+#             resp = urllib.request.urlretrieve(item[0], item[1])
+#             finalFiles.append(os.path.join(str(uuid.uuid4()) + '.jpg'))
+#             #resize and save
+#             resizeImage(item[1], f"{os.path.join('assets')}/{finalFiles[-1]}" )
 
-            #cleanup - perhaps do not delete as we want to make the small pic expandable. we can delete at beginning 
-            #os.remove(item[1])
+#             #cleanup - perhaps do not delete as we want to make the small pic expandable. we can delete at beginning 
+#             #os.remove(item[1])
             
-        except urllib.error.URLError as e:
-            resp = e
-            print("Problem: " + str(resp.reason))
-            finalFiles.append(os.path.join('novideo.png'))
+#         except urllib.error.URLError as e:
+#             resp = e
+#             print("Problem: " + str(resp.reason))
+#             finalFiles.append(os.path.join('novideo.png'))
 
 
-    #return the pictures in div list
+#     #return the pictures in div list
     
-    for item in zip(finalFiles, tempFiles):
-        camerafeed.append(
-            html.A(
-            children=[
-            html.Img(
-                src= app.get_asset_url(item[0])
-            )
-            ], href=item[1])
-        )
+#     for item in zip(finalFiles, tempFiles):
+#         camerafeed.append(
+#             html.Div([
+#                 html.Img(
+#                     src= app.get_asset_url(item[0])
+#                 )
+#             ]) #className='gallery__item')
+#         )
 
-    print(camerafeed[0])
-    return html.Div(camerafeed, style={'display': 'inline-block'})
+#     return html.Div([
+#             camerafeed
+#             ])#, className ='gallery'),
+    
+
+
+# #part where I update the cameras
+# @app.callback(
+#      Output(component_id ='display-cams', component_property= 'children'),
+#      [Input(component_id ='interval-component', component_property= 'n_intervals')]
+# )
+# def display_cams(n):
+#     #remove all previous images if present
+#     files_in_directory = os.listdir('assets')
+#     filtered_files = [file for file in files_in_directory if file.endswith(".jpg")]
+
+#     for file in filtered_files:
+#         path_to_file = os.path.join('assets', file)
+#         os.remove(path_to_file)
+
+
+#     #Check if we have some cameras that need scrape, if yes scrape and add the correct url to the list
+#     newUrl = []
+#     publicUrls = data["camera_scrapers"]
+#     #print("Public URLs")
+#     #print(publicUrls)
+    
+#     if publicUrls:
+#         for pUrl in publicUrls:
+#             searchString = 'live.jpg'
+#             newUrl.append(getCameraUrl(pUrl, searchString))
+
+#     #donwload, process the images and store it in assets 
+#     urls = data['camera_sources']
+#     #is there was scraped url found, 
+#     if len(newUrl) != 0: 
+#         urls = urls + newUrl
+    
+#     #print("List of URLs ")
+#     #print(urls)
+#     tempFiles = []
+#     finalFiles = []
+#     camerafeed = []
+
+#     for url in urls:
+#         tempFiles.append(os.path.join(*["assets", str(uuid.uuid4()) + '_temp.jpg']))
+
+#     for item in zip(urls, tempFiles):
+#         try:
+#             resp = urllib.request.urlretrieve(item[0], item[1])
+#             finalFiles.append(os.path.join(str(uuid.uuid4()) + '.jpg'))
+#             #resize and save
+#             resizeImage(item[1], f"{os.path.join('assets')}/{finalFiles[-1]}" )
+
+#             #cleanup - perhaps do not delete as we want to make the small pic expandable. we can delete at beginning 
+#             #os.remove(item[1])
+            
+#         except urllib.error.URLError as e:
+#             resp = e
+#             print("Problem: " + str(resp.reason))
+#             finalFiles.append(os.path.join('novideo.png'))
+
+
+#     #return the pictures in div list
+    
+#     for item in zip(finalFiles, tempFiles):
+#         camerafeed.append(
+#             html.A(
+#             children=[
+#             html.Img(
+#                 src= app.get_asset_url(item[0])
+#             )
+#             ], href=item[1])
+#         )
+
+#     print(camerafeed[0])
+#     return html.Div(camerafeed, style={'display': 'inline-block'})
 
 
 @app.callback(
@@ -504,4 +588,4 @@ def update_stocks_live(n_clicks, value, n):
     return fig, new_loading_style
 
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(debug=True)
