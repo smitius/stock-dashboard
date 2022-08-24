@@ -22,9 +22,9 @@ from ta.momentum import StochasticOscillator
 
 #for Image Manipulation
 from PIL import Image
-import urllib.request
-import os
-import uuid
+#import urllib.request
+#import os
+#import uuid
 from datetime import datetime
 
 
