@@ -32,9 +32,9 @@ from datetime import datetime
 from urllib.request import urlopen
 
 #for scraping
-import re
-from bs4 import BeautifulSoup
-import requests as rq
+#import re
+#from bs4 import BeautifulSoup
+#import requests as rq
 
 # Market Data 
 import yfinance as yf
