@@ -21,7 +21,7 @@ from ta.trend import MACD
 from ta.momentum import StochasticOscillator
 
 #for Image Manipulation
-from PIL import Image
+#from PIL import Image
 #import urllib.request
 #import os
 #import uuid
